@@ -61,7 +61,7 @@ public:
     std::vector<std::unique_ptr<Div>> children;
     bool horizontal;
     int occupied = 0;
-    Div(Rect r, bool h,Color fg={},Color bg={}) : r(r), horizontal(h),fg(fg),bg(bg) {}
+    Div(Rect r={}, bool h=1,Color fg={},Color bg={}) : r(r), horizontal(h),fg(fg),bg(bg) {}
     virtual void add(std::unique_ptr<Div> b, int size) {
         int maxSize = horizontal ? r.w : r.h;
         if (occupied + size > maxSize) size = maxSize - occupied;

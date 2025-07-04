@@ -11,7 +11,6 @@ struct Color {
     Color(uint8_t r,uint8_t g=0,uint8_t b=0): r(r),g(g),b(b),initialised(1) {}
     Color(): initialised(0) {}
 };
-void sigintHandler(int sig_num);
 namespace Terminal {
     namespace {
         struct termios orig_termios;
