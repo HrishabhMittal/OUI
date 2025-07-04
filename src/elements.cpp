@@ -10,6 +10,10 @@ struct Rect {
     int x,y,w,h;
     Rect(int x=0,int y=0,int w=0,int h=0): x(x), y(y), w(w), h(h) {}
 };
+bool pointInRect(int px, int py, const Rect& r) {
+    return px >= r.x && px < r.x + r.w &&
+           py >= r.y && py < r.y + r.h;
+}
 bool operator==(const Rect& a,const Rect& b) {
     return (a.x==b.x&&a.y==b.y&&a.w==b.w&&a.h==b.h);
 }
@@ -50,7 +54,6 @@ void printInRect(const std::string& s, Rect r,Color fg={},Color bg={}) {
     std::cout << std::flush;
 }
 
-
 class Div {
 public:
     Color fg,bg;
@@ -84,8 +87,8 @@ public:
 };
 
 class Label : public Div {
-    std::string text;
 public:
+    std::string text;
     Label(const std::string& text, Rect r = {}, bool h = true)
         : Div(r, h), text(text) {}
     void add(std::unique_ptr<Div> b, int size) override {}
@@ -94,15 +97,35 @@ public:
         Terminal::resetColor();
     }
 };
-
+class Button;
+namespace ButtonHandler {
+    namespace {
+        std::vector<Button*> b;
+    }
+    void add(Button* bu) {
+        b.push_back(bu);
+    }
+};
 class Button : public Div {
-    std::string text;
 public:
-    Button(const std::string& text, Rect r = {}, bool h = true)
-        : Div(r, h), text(text) {}
+    std::string text;
+    Button(const std::string& text, Rect r = {}, bool h = true): Div(r, h), text(text) {
+        ButtonHandler::add(this);
+    }
     void add(std::unique_ptr<Div> b, int size) override {}
     void render() const override {
         printInRect(text,r,fg,bg);
         Terminal::resetColor();
     }
+    void (*onlick)(Button*) = nullptr;
 };
+namespace ButtonHandler {
+    void update() {
+        Input::Mouse m=Input::getMouseState();
+        if (m.leftClick) {
+            for (auto i:b) {
+                if (pointInRect(m.mouseX, m.mouseY, i->r)) i->onlick(i);
+            }
+        }
+    }
+}
