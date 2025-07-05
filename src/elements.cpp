@@ -58,26 +58,46 @@ class Div {
 public:
     Color fg,bg;
     Rect r;
-    std::vector<std::unique_ptr<Div>> children;
+    std::vector<std::pair<float,std::unique_ptr<Div>>> children;
     bool horizontal;
     int occupied = 0;
     Div(Rect r={}, bool h=1,Color fg={},Color bg={}) : r(r), horizontal(h),fg(fg),bg(bg) {}
-    virtual void add(std::unique_ptr<Div> b, int size) {
-        int maxSize = horizontal ? r.w : r.h;
-        if (occupied + size > maxSize) size = maxSize - occupied;
-        if (size <= 0) return;
+    void resize(Rect rect) {
+        r=rect;
+        occupied=0;
+        for (auto&& i:children) {
+            float size=i.first;
+            if (size<1.0) size*=r.w;
+            auto& b=i.second;
+            int maxSize=horizontal?r.w:r.h;
+            if (occupied+size>maxSize) size=maxSize-occupied;
+            if (size<0) continue;
+            if (horizontal)
+                b->resize(Rect(r.x + occupied, r.y, size, r.h));
+            else
+                b->resize(Rect(r.x, r.y + occupied, r.w, size));
+            occupied+=size;
+            if (!b->fg.initialised) b->fg=fg;
+            if (!b->bg.initialised) b->bg=bg;
+        }
+    }
+    virtual void add(std::unique_ptr<Div> b,float size) {
+        int maxSize = horizontal?r.w:r.h;
+        float sizeBackup=size;
+        if (size<1.0) size*=r.w;
+        if (occupied+size>maxSize) size=maxSize-occupied;
+        if (size<0) return;
         if (horizontal)
-            b->r = Rect(r.x + occupied, r.y, size, r.h);
+            b->resize(Rect(r.x+occupied,r.y,size,r.h));
         else
-            b->r = Rect(r.x, r.y + occupied, r.w, size);
-        if (!b->fg.initialised) b->fg=fg;
-        if (!b->bg.initialised) b->bg=bg;
-        occupied += size;
-        children.push_back(std::move(b));
+            b->resize(Rect(r.x,r.y+occupied,r.w,size));
+        occupied+=size;
+        children.push_back({sizeBackup,nullptr});
+        children.back().second=std::move(b);
     }
     virtual void render() const {
         printInRect("",r,fg,bg);
-        for (auto&& i : children) i->render();
+        for (auto&& i : children) i.second->render();
     }
 };
 
@@ -91,7 +111,7 @@ public:
     std::string text;
     Label(const std::string& text, Rect r = {}, bool h = true)
         : Div(r, h), text(text) {}
-    void add(std::unique_ptr<Div> b, int size) override {}
+    void add(std::unique_ptr<Div> b,float size) override {}
     void render() const override {
         printInRect(text,r,fg,bg);
         Terminal::resetColor();
@@ -112,7 +132,7 @@ public:
     Button(const std::string& text, Rect r = {}, bool h = true): Div(r, h), text(text) {
         ButtonHandler::add(this);
     }
-    void add(std::unique_ptr<Div> b, int size) override {}
+    void add(std::unique_ptr<Div> b,float size) override {}
     void render() const override {
         printInRect(text,r,fg,bg);
         Terminal::resetColor();
