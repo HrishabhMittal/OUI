@@ -1,5 +1,6 @@
 #include <csignal>
 #include <iostream>
+#include <string>
 #include <unistd.h>
 #include <termios.h>
 #include <sys/select.h>
@@ -16,6 +17,24 @@ namespace Terminal {
         struct termios orig_termios;
         bool raw_mode=0,alt=0,vis=1;
     }
+    std::string bold_off="\033[22m";
+    std::string italic_off="\033[23m";
+    std::string underline_off="\033[24m";
+    std::string blink_off="\033[25m";
+    std::string reverse_off="\033[27m";
+    std::string hidden_off="\033[28m";
+    std::string strikethrough_off="\033[29m";
+    std::string bold="\033[1m";
+    std::string dim="\033[2m";
+    std::string italic="\033[3m";
+    std::string underline="\033[4m";
+    std::string blinking="\033[5m";
+    std::string reverse="\033[7m";
+    std::string hidden="\033[8m";
+    std::string strikethrough="\033[9m";
+    std::string reset="\033[0m";
+    std::string cursorvis="\033[?25h";
+    std::string cursorinvis="\033[?25l";
     void cursorVisible() {
         vis=1;
         std::cout<<"\033[?25h";
@@ -36,8 +55,14 @@ namespace Terminal {
     void FGColor(Color c) {
         std::cout << "\033[38;2;" << int(c.r) << ";" << int(c.g) << ";" << int(c.b) << "m";
     }
+    std::string FGColor_str(Color c) {
+        return "\033[38;2;" + std::to_string(c.r) + ";" + std::to_string(c.g) + ";" + std::to_string(c.b) + "m";
+    }
     void BGColor(Color c) {
         std::cout << "\033[48;2;" << int(c.r) << ";" << int(c.g) << ";" << int(c.b) << "m";
+    }
+    std::string BGColor_str(Color c) {
+        return "\033[48;2;" + std::to_string(c.r) + ";" + std::to_string(c.g) + ";" + std::to_string(c.b) + "m";
     }
     void resetColor() { std::cout<<"\033[0m"; }
     void unset_raw_mode() {

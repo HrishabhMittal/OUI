@@ -17,42 +17,115 @@ bool pointInRect(int px, int py, const Rect& r) {
 bool operator==(const Rect& a,const Rect& b) {
     return (a.x==b.x&&a.y==b.y&&a.w==b.w&&a.h==b.h);
 }
-void printInRect(const std::string& s, Rect r,Color fg={},Color bg={}) {
+
+void printInRect(const std::string& s, Rect r, Color fg = {}, Color bg = {}) {
     if (fg.initialised) {
         Terminal::FGColor(fg);
         Terminal::BGColor(bg);
     }
-    int x=0,y=0;
+
+    int printedCols = 0;
+    int printedRows = 0;
     Terminal::setCursorPos(r.x, r.y);
-    for (size_t idx=0;idx<s.size()&&y<r.h;++idx) {
-        char c=s[idx];
-        if (c=='\n'||x==r.w) {
-            while (x<r.w) {
-                std::cout<<' ';
-                ++x;
-            }
-            x=0;
-            ++y;
-            if (y==r.h) break;
-            Terminal::setCursorPos(r.x,r.y+y);
-            if (c=='\n') continue;
+
+    auto flushLinePadding = [&](int cols) {
+        while (cols < r.w) {
+            std::cout << ' ';
+            ++cols;
         }
-        std::cout<<c;
-        ++x;
+    };
+
+    size_t idx = 0;
+    while (idx < s.size() && printedRows < r.h) {
+        if (s[idx] == '\n' || printedCols == r.w) {
+            // End-of-line: pad remaining columns and move to next row
+            flushLinePadding(printedCols);
+            printedCols = 0;
+            ++printedRows;
+            if (printedRows == r.h) break;
+            Terminal::setCursorPos(r.x, r.y + printedRows);
+            if (s[idx] == '\n') {
+                ++idx;
+                continue;
+            }
+        }
+
+        // Handle ANSI escape sequences starting with ESC '['
+        if (s[idx] == '\x1B' && idx + 1 < s.size() && s[idx + 1] == '[') {
+            // Print entire escape sequence without counting its length
+            std::cout << '\x1B' << '[';
+            idx += 2;
+            // Sequence continues until a letter (A–Z or a–z)
+            while (idx < s.size()) {
+                char c = s[idx++];
+                std::cout << c;
+                if (std::isalpha(static_cast<unsigned char>(c))) {
+                    break;
+                }
+            }
+            // printedCols unchanged
+            continue;
+        }
+
+        // Regular character
+        std::cout << s[idx++];
+        ++printedCols;
     }
-    while (x<r.w&&y<r.h) {
-        std::cout<<' ';
-        ++x;
+
+    // Pad the current line if we exited before reaching full width
+    if (printedRows < r.h && printedCols < r.w) {
+        flushLinePadding(printedCols);
+        ++printedRows;
     }
-    ++y;
-    while (y<r.h) {
-        Terminal::setCursorPos(r.x,r.y+y);
-        for (int i=0;i<r.w;++i) std::cout<<' ';
-        ++y;
+
+    // Clear remaining lines in the rectangle
+    while (printedRows < r.h) {
+        Terminal::setCursorPos(r.x, r.y + printedRows);
+        for (int i = 0; i < r.w; ++i) {
+            std::cout << ' ';
+        }
+        ++printedRows;
     }
+
     Terminal::resetColor();
     std::cout << std::flush;
 }
+// void printInRect(const std::string& s, Rect r,Color fg={},Color bg={}) {
+//     if (fg.initialised) {
+//         Terminal::FGColor(fg);
+//         Terminal::BGColor(bg);
+//     }
+//     int x=0,y=0;
+//     Terminal::setCursorPos(r.x, r.y);
+//     for (size_t idx=0;idx<s.size()&&y<r.h;++idx) {
+//         char c=s[idx];
+//         if (c=='\n'||x==r.w) {
+//             while (x<r.w) {
+//                 std::cout<<' ';
+//                 ++x;
+//             }
+//             x=0;
+//             ++y;
+//             if (y==r.h) break;
+//             Terminal::setCursorPos(r.x,r.y+y);
+//             if (c=='\n') continue;
+//         }
+//         std::cout<<c;
+//         ++x;
+//     }
+//     while (x<r.w&&y<r.h) {
+//         std::cout<<' ';
+//         ++x;
+//     }
+//     ++y;
+//     while (y<r.h) {
+//         Terminal::setCursorPos(r.x,r.y+y);
+//         for (int i=0;i<r.w;++i) std::cout<<' ';
+//         ++y;
+//     }
+//     Terminal::resetColor();
+//     std::cout << std::flush;
+// }
 
 class Div {
 public:
