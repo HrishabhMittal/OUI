@@ -17,7 +17,7 @@ void onMainButtonClick(Button* btn) {
     btn->bg = {255, 0, 128};
 
     if (label_ptr) {
-        label_ptr->text = "You've clicked " + std::to_string(click_count) + " times!";
+        label_ptr->text = "You've clicked " + std::to_string(click_count) +Terminal::FGColor_str({255,0,0})+ " times!";
         if (click_count % 2 == 0) {
             label_ptr->fg = {0, 255, 0};
             label_ptr->bg = {0, 0, 0};
