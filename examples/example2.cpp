@@ -7,7 +7,7 @@
 
 int click_count = 0;
 
-Label* label_ptr = nullptr;
+std::weak_ptr<Label> label_ptr;
 Button* main_button_ptr = nullptr;
 
 void onMainButtonClick(Button* btn) {
@@ -16,14 +16,14 @@ void onMainButtonClick(Button* btn) {
     btn->fg = {255, 255, 255};
     btn->bg = {255, 0, 128};
 
-    if (label_ptr) {
-        label_ptr->text = "You've clicked " + std::to_string(click_count) + " times!";
+    if (!label_ptr.expired()) {
+        label_ptr.lock()->text = "You've clicked " + std::to_string(click_count) +Terminal::FGColor_str({255,0,0})+ " times!";
         if (click_count % 2 == 0) {
-            label_ptr->fg = {0, 255, 0};
-            label_ptr->bg = {0, 0, 0};
+            label_ptr.lock()->fg = {0, 255, 0};
+            label_ptr.lock()->bg = {0, 0, 0};
         } else {
-            label_ptr->fg = {255, 255, 0};
-            label_ptr->bg = {0, 0, 255};
+            label_ptr.lock()->fg = {255, 255, 0};
+            label_ptr.lock()->bg = {0, 0, 255};
         }
     }
 }
@@ -42,19 +42,19 @@ int main() {
 
     Application app(Rect{1, 1, 50, 12}, false, {255,255,255}, {0,0,0});
 
-    auto label = std::make_unique<Label>("Welcome to Terminal UI!", Rect{1, 1, 48, 3});
+    auto label = std::make_shared<Label>("Welcome to Terminal UI!", Rect{1, 1, 48, 3});
     label->fg = {0, 255, 255};
     label->bg = {32, 32, 32};
-    label_ptr = label.get();
+    label_ptr = label;
 
-    auto div = std::make_unique<Div>();
+    auto div = std::make_shared<Div>();
 
-    auto main_button = std::make_unique<Button>("Press Me!");
+    auto main_button = std::make_shared<Button>("Press Me!");
     main_button->onlick = &onMainButtonClick;
     main_button->fg = {0, 0, 255};
     main_button->bg = {255, 255, 0};
 
-    auto quit_button = std::make_unique<Button>("Quit");
+    auto quit_button = std::make_shared<Button>("Quit");
     quit_button->onlick = &onQuitButtonClick;
     quit_button->fg = {255, 255, 255};
     quit_button->bg = {255, 64, 64};

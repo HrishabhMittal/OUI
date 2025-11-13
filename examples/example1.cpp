@@ -13,11 +13,11 @@ int main() {
     
     Application app(Rect{1, 1, 50, 10}, true, {255,255,255}, {0,0,0});
     
-    auto label = std::make_unique<Label>("Welcome to Terminal UI!", Rect{1, 1, 30, 3});
+    auto label = std::make_shared<Label>("Welcome to Terminal UI!", Rect{1, 1, 30, 3});
     label->fg={0,255,255};
     label->bg={255,0,0};
     
-    auto button = std::make_unique<Button>("Press Me!", Rect{1, 4, 15, 3});
+    auto button = std::make_shared<Button>("Press Me!", Rect{1, 4, 15, 3});
     button->onlick=&changeColor;
     button->fg={0,0,255};
     button->bg={255,255,0};

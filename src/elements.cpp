@@ -131,7 +131,7 @@ class Div {
 public:
     Color fg,bg;
     Rect r;
-    std::vector<std::pair<float,std::unique_ptr<Div>>> children;
+    std::vector<std::pair<float,std::shared_ptr<Div>>> children;
     bool horizontal;
     int occupied = 0;
     Div(Rect r={}, bool h=1,Color fg={},Color bg={}) : r(r), horizontal(h),fg(fg),bg(bg) {}
@@ -154,7 +154,7 @@ public:
             if (!b->bg.initialised) b->bg=bg;
         }
     }
-    virtual void add(std::unique_ptr<Div> b,float size) {
+    virtual void add(std::shared_ptr<Div> b,float size) {
         int maxSize = horizontal?r.w:r.h;
         float sizeBackup=size;
         if (size<1.0) size*=r.w;
@@ -184,7 +184,7 @@ public:
     std::string text;
     Label(const std::string& text, Rect r = {}, bool h = true)
         : Div(r, h), text(text) {}
-    void add(std::unique_ptr<Div> b,float size) override {}
+    void add(std::shared_ptr<Div> b,float size) override {}
     void render() const override {
         printInRect(text,r,fg,bg);
         Terminal::resetColor();
@@ -205,7 +205,7 @@ public:
     Button(const std::string& text, Rect r = {}, bool h = true): Div(r, h), text(text) {
         ButtonHandler::add(this);
     }
-    void add(std::unique_ptr<Div> b,float size) override {}
+    void add(std::shared_ptr<Div> b,float size) override {}
     void render() const override {
         printInRect(text,r,fg,bg);
         Terminal::resetColor();
