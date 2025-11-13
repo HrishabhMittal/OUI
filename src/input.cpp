@@ -170,16 +170,17 @@ namespace Input {
     int handleInput() {
         static bool handlingF = false;
         char c;
-        fd_set fds;
-        struct timeval tv = {0, 0};
-        FD_ZERO(&fds);
-        FD_SET(STDIN_FILENO, &fds);
-        
-        if (select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv) <= 0)
-            return NONE;
-        
-        if (read(STDIN_FILENO, &c, 1) != 1)
-            return NONE;
+        if (read(STDIN_FILENO, &c, 1) != 1) return NONE;
+        // fd_set fds;
+        // struct timeval tv = {0, 0};
+        // FD_ZERO(&fds);
+        // FD_SET(STDIN_FILENO, &fds);
+        // 
+        // if (select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv) <= 0)
+        //     return NONE;
+        // 
+        // if (read(STDIN_FILENO, &c, 1) != 1)
+        //     return NONE;
     
         if (c == '\x1B') {
             struct timeval tv = {0, 20000};
