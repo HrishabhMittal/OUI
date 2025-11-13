@@ -186,6 +186,14 @@ public:
 class Application : public Div {
 public:
     Application(Rect r, bool h,Color fg={},Color bg={}) : Div(r,h,fg,bg) {}
+    bool fit_screen() {
+        std::vector<int> size;
+        bool b=Terminal::size(size);
+        if (b) {
+            resize({1,1,size[1],size[0]});
+        }
+        return b;
+    }
 };
 
 class Label : public Div {

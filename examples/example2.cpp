@@ -41,6 +41,7 @@ int main() {
     Terminal::cursorInvisible();
 
     Application app(Rect{1, 1, 50, 12}, false, {255,255,255}, {0,0,0});
+    app.fit_screen();
 
     auto label = std::make_shared<Label>("Welcome to Terminal UI!", Rect{1, 1, 48, 3});
     label->fg = {0, 255, 255};
@@ -61,8 +62,8 @@ int main() {
     
     div->add(std::move(main_button),0.75);
     div->add(std::move(quit_button),0.25);
-    app.add(std::move(label),8);
-    app.add(std::move(div),4);
+    app.add(std::move(label),0.8);
+    app.add(std::move(div),0.2);
         
     do {
         ButtonHandler::update();

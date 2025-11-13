@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <sys/select.h>
+#include <sys/ioctl.h>
 #include <vector>
 #include <cstdint>
 #define COLOR_RED     Color(255, 0, 0)
@@ -95,6 +96,18 @@ namespace Terminal {
         raw.c_lflag &= ~(ICANON | ECHO);
         tcsetattr(STDIN_FILENO, TCSANOW, &raw);
         std::cout << "\033[?1003h\033[?1006h" << std::flush;
+    }
+    bool size(std::vector<int>& size) {
+        size.clear();
+        struct winsize w;
+        if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0) {
+            size.push_back(w.ws_row);
+            size.push_back(w.ws_col);
+        } else {
+            std::cerr << "Error getting terminal size." << std::endl;
+            return 0;
+        }
+        return 1;
     }
     std::vector<int> getCursorPos() {
         std::cout << "\033[6n" << std::flush;
