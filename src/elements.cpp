@@ -167,8 +167,7 @@ public:
             if (horizontal) size*=r.w;
             else size*=r.h;
         }
-        if (occupied+size>maxSize) size=maxSize-occupied;
-        if (size<0) return;
+        if (occupied+size>maxSize||size<0.0) size=maxSize-occupied;
         if (horizontal)
             b->resize(Rect(r.x+occupied,r.y,size,r.h));
         else
