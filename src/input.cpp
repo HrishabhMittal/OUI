@@ -6,6 +6,15 @@
 #include <sys/select.h>
 #include <vector>
 #include <cstdint>
+#define COLOR_RED     Color(255, 0, 0)
+#define COLOR_GREEN   Color(0, 255, 0)
+#define COLOR_BLUE    Color(0, 0, 255)
+#define COLOR_BLACK   Color(0, 0, 0)
+#define COLOR_WHITE   Color(255, 255, 255)
+#define COLOR_YELLOW  Color(255, 255, 0)
+#define COLOR_CYAN    Color(0, 255, 255)
+#define COLOR_MAGENTA Color(255, 0, 255)
+#define COLOR_GRAY    Color(128, 128, 128)
 struct Color {
     bool initialised=0;
     uint8_t r,g,b;
@@ -161,7 +170,16 @@ namespace Input {
     int handleInput() {
         static bool handlingF = false;
         char c;
-        if (read(STDIN_FILENO, &c, 1) != 1) return NONE;
+        fd_set fds;
+        struct timeval tv = {0, 0};
+        FD_ZERO(&fds);
+        FD_SET(STDIN_FILENO, &fds);
+        
+        if (select(STDIN_FILENO + 1, &fds, NULL, NULL, &tv) <= 0)
+            return NONE;
+        
+        if (read(STDIN_FILENO, &c, 1) != 1)
+            return NONE;
     
         if (c == '\x1B') {
             struct timeval tv = {0, 20000};

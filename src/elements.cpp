@@ -21,6 +21,8 @@ bool operator==(const Rect& a,const Rect& b) {
 void printInRect(const std::string& s, Rect r, Color fg = {}, Color bg = {}) {
     if (fg.initialised) {
         Terminal::FGColor(fg);
+    }
+    if (bg.initialised) {
         Terminal::BGColor(bg);
     }
 
@@ -135,12 +137,16 @@ public:
     bool horizontal;
     int occupied = 0;
     Div(Rect r={}, bool h=1,Color fg={},Color bg={}) : r(r), horizontal(h),fg(fg),bg(bg) {}
+    Div(bool h,Rect r={},Color fg={},Color bg={}) : r(r), horizontal(h),fg(fg),bg(bg) {}
     void resize(Rect rect) {
         r=rect;
         occupied=0;
         for (auto&& i:children) {
             float size=i.first;
-            if (size<1.0) size*=r.w;
+            if (size<1.0) {
+                if (horizontal) size*=r.w;
+                else size*=r.h;
+            }
             auto& b=i.second;
             int maxSize=horizontal?r.w:r.h;
             if (occupied+size>maxSize) size=maxSize-occupied;
@@ -157,7 +163,10 @@ public:
     virtual void add(std::shared_ptr<Div> b,float size) {
         int maxSize = horizontal?r.w:r.h;
         float sizeBackup=size;
-        if (size<1.0) size*=r.w;
+        if (size<1.0) {
+            if (horizontal) size*=r.w;
+            else size*=r.h;
+        }
         if (occupied+size>maxSize) size=maxSize-occupied;
         if (size<0) return;
         if (horizontal)
